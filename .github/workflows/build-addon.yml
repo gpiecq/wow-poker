@@ -1,0 +1,29 @@
+name: Build Addon ZIP
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare addon folder
+        run: |
+          ADDON_NAME="WowPoker"
+          mkdir -p "build/$ADDON_NAME/textures"
+
+          cp WowPoker.toc Locale.lua Protocol.lua Deck.lua GameLogic.lua \
+             CardTextures.lua UI.lua Menu.lua Core.lua README.md \
+             "build/$ADDON_NAME/"
+
+          cp textures/*.tga "build/$ADDON_NAME/textures/"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WowPoker
+          path: build/WowPoker

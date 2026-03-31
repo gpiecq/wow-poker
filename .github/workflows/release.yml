@@ -1,0 +1,45 @@
+name: Package & Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from TOC
+        id: version
+        run: |
+          VERSION=$(grep "^## Version:" WowPoker.toc | sed 's/## Version: //')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build zip
+        run: |
+          ADDON_NAME="WowPoker"
+          mkdir -p /tmp/addon-build/$ADDON_NAME/textures
+
+          cp WowPoker.toc Locale.lua Protocol.lua Deck.lua GameLogic.lua \
+             CardTextures.lua UI.lua Menu.lua Core.lua README.md \
+             /tmp/addon-build/$ADDON_NAME/
+
+          cp textures/*.tga /tmp/addon-build/$ADDON_NAME/textures/
+
+          cd /tmp/addon-build
+          zip -r "$GITHUB_WORKSPACE/WowPoker.zip" $ADDON_NAME
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: WowPoker v${{ steps.version.outputs.version }}
+          files: WowPoker.zip
+          generate_release_notes: true
