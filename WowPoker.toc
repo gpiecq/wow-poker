@@ -1,0 +1,16 @@
+## Interface: 20505
+## Title: WowPoker
+## Notes: Texas Hold'em Poker - Heads Up (1v1)
+## Notes-frFR: Texas Hold'em Poker - Heads Up (1v1)
+## Author: WowPoker
+## Version: 1.0.0
+## SavedVariablesPerCharacter: WowPokerDB
+
+Locale.lua
+Protocol.lua
+Deck.lua
+GameLogic.lua
+CardTextures.lua
+UI.lua
+Menu.lua
+Core.lua
