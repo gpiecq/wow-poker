@@ -35,6 +35,105 @@ local btnFold, btnCheck, btnCall, btnBet, btnRaise, btnAllIn
 local betSlider, betSliderText
 local statusText
 local invitePopup
+local minimapButton
+
+-- ==========================================
+-- MINIMAP BUTTON
+-- ==========================================
+
+function UI.CreateMinimapButton()
+    if minimapButton then return end
+
+    local BUTTON_SIZE = 32
+    local savedAngle = WowPokerDB and WowPokerDB.minimapAngle or 225
+
+    minimapButton = CreateFrame("Button", "WowPokerMinimapButton", Minimap)
+    minimapButton:SetSize(32, 32)
+    minimapButton:SetFrameStrata("MEDIUM")
+    minimapButton:SetFrameLevel(8)
+    minimapButton:SetMovable(true)
+    minimapButton:SetClampedToScreen(true)
+    minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    minimapButton:RegisterForDrag("LeftButton")
+
+    -- Border (same as NodeCounter)
+    local overlay = minimapButton:CreateTexture(nil, "OVERLAY")
+    overlay:SetSize(53, 53)
+    overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+    overlay:SetPoint("TOPLEFT")
+
+    -- Custom ace of diamonds icon
+    local icon = minimapButton:CreateTexture(nil, "BACKGROUND")
+    icon:SetSize(20, 20)
+    icon:SetPoint("CENTER", 0, 0)
+    icon:SetTexture("Interface\\AddOns\\WowPoker\\textures\\minimap-icon")
+
+    -- Highlight (same as NodeCounter)
+    local highlight = minimapButton:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetSize(24, 24)
+    highlight:SetPoint("CENTER")
+    highlight:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+    highlight:SetBlendMode("ADD")
+
+    -- Position around minimap
+    local function UpdatePosition(angle)
+        local radius = 80
+        local x = math.cos(math.rad(angle)) * radius
+        local y = math.sin(math.rad(angle)) * radius
+        minimapButton:ClearAllPoints()
+        minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
+    end
+
+    UpdatePosition(savedAngle)
+
+    -- Drag to reposition around minimap
+    local isDragging = false
+    minimapButton:SetScript("OnDragStart", function()
+        isDragging = true
+    end)
+
+    minimapButton:SetScript("OnDragStop", function()
+        isDragging = false
+    end)
+
+    minimapButton:SetScript("OnUpdate", function()
+        if not isDragging then return end
+        local mx, my = Minimap:GetCenter()
+        local cx, cy = GetCursorPosition()
+        local scale = Minimap:GetEffectiveScale()
+        cx, cy = cx / scale, cy / scale
+        local angle = math.deg(math.atan2(cy - my, cx - mx))
+        UpdatePosition(angle)
+        if WowPokerDB then
+            WowPokerDB.minimapAngle = angle
+        end
+    end)
+
+    -- Click handlers
+    minimapButton:SetScript("OnClick", function(self, button)
+        if button == "LeftButton" then
+            UI.Toggle()
+        elseif button == "RightButton" then
+            WowPoker.Game.ShowStats()
+        end
+    end)
+
+    -- Tooltip
+    minimapButton:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:AddLine("|cFFFFD700WowPoker|r")
+        GameTooltip:AddLine(L["HELP_TITLE"], 1, 1, 1)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddDoubleLine("Left-click", "Toggle table", 0.8, 0.8, 0.8, 1, 1, 1)
+        GameTooltip:AddDoubleLine("Right-click", "Stats", 0.8, 0.8, 0.8, 1, 1, 1)
+        GameTooltip:AddDoubleLine("Drag", "Move button", 0.8, 0.8, 0.8, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+
+    minimapButton:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+end
 
 -- ==========================================
 -- MAIN FRAME

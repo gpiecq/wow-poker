@@ -58,10 +58,4 @@ function M.Init()
         end)
     end
 
-    -- Alternative: hook the dropdown initialization to handle our button
-    if UIDropDownMenu_Initialize then
-        hooksecurefunc("UnitPopup_HideButtons", function()
-            -- Ensure our button is shown for valid targets
-        end)
-    end
 end

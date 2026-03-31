@@ -55,14 +55,12 @@ function Core.OnAddonLoaded()
     -- Initialize menu (right-click integration)
     M.Init()
 
-    -- Create the UI (hidden)
+    -- Create the UI (hidden) and minimap button
     UI.CreateMainFrame()
+    UI.CreateMinimapButton()
 
     -- Register slash commands
     Core.RegisterSlashCommands()
-
-    -- Seed random
-    math.randomseed(time())
 
     G.PrintMessage(L["ADDON_LOADED"])
 end
